@@ -1,0 +1,74 @@
+#!/bin/sh 
+# 
+# Starts eggdrop script 
+# 
+# Author: iMakhonin [16.04.2016]
+# 
+
+BOTNAME=Bot
+USRNAME=eggdrop
+BINFILE=eggdrop
+PATHCNF=conf
+PIDPATH=runs
+SRCPATH=/usr/share/eggdrop
+DAEMON=$SRCPATH/$BINFILE
+PIDFILE=$SRCPATH/$PIDPATH/$BOTNAME.pid
+OPTIONS=$SRCPATH/$PATHCNF/$BOTNAME.conf
+
+. /lib/lsb/init-functions
+
+# See how we were called. 
+
+case "$1" in
+    start)
+	log_daemon_msg "Starting eggdrop..." "[ $BOTNAME ]"
+
+	if [ ! -x $DAEMON ]; then
+	    log_action_msg "Eggdrop binary missing - not starting"
+	    log_end_msg 1
+	fi
+
+	if start-stop-daemon --chdir $SRCPATH --start --oknodo --quiet --chuid $USRNAME --pidfile $PIDFILE --exec $DAEMON -- $OPTIONS; then
+	    log_end_msg 0
+	fi
+    ;;
+    stop)
+	log_daemon_msg "Stopping eggdrop..." "[ $BOTNAME ]"
+	pid=$PIDFILE2 || true
+	if [ -z "$pid" ]; then		# no pid found, so either not running, or error
+	    pid=$(pgrep -f ^$DAEMON) || true
+	    start-stop-daemon --chdir $SRCPATH --stop --oknodo --quiet --chuid $USRNAME --pidfile $PIDFILE --exec $DAEMON
+	fi
+
+	if [ -n "$pid" ]; then
+	    sig=0
+	    n=1
+	    while kill -$sig $PIDFILE 2>/dev/null; do
+		if [ $n -eq 1 ]; then
+		    echo "waiting for pid $pid to die"
+		fi
+		if [ $n -eq 11 ]; then
+		    echo "giving up on pid $pid with kill -0; trying -9"
+		    sig=9
+		fi
+		if [ $n -gt 20 ]; then
+		    echo "giving up on pid $pid"
+		    break
+		fi
+		n=$(($n+1))
+		sleep 1
+	    done
+	fi
+	log_end_msg 0
+    ;;
+  restart) 
+        $0 stop 
+        sleep 1 
+        $0 start 
+        ;; 
+  *) 
+        log_action_msg "Usage: {start|stop|restart}" 
+        exit 1 
+esac 
+
+exit 0
