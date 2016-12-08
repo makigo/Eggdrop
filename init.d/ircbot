@@ -1,8 +1,9 @@
-#!/bin/sh 
+#!/bin/sh -e
 # 
 # Starts eggdrop script 
 # 
-# Author: iMakhonin [16.04.2016]
+# Author: iMakhonin aka Makigo [16.04.2016]
+# Email: work.makhonon@gmail.com
 # 
 
 BOTNAME=Bot
