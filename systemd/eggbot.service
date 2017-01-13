@@ -1,0 +1,14 @@
+[Unit]
+Description=Eggdrop name Bot
+After=multi-user.target
+
+[Service]
+Type=idle
+User=eggdrop
+Group=eggdrop
+WorkingDirectory=/usr/share/eggdrop/
+ExecStart=/usr/share/eggdrop/eggdrop /usr/share/eggdrop/conf/Bot.conf
+PIDFile=/usr/share/eggdrop/runs/Bot.pid
+
+[Install]
+WantedBy=multi-user.target
